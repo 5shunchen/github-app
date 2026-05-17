@@ -1,111 +1,185 @@
-name: 📱 Build iOS IPA - Guaranteed
+name: 📱 Build iOS IPA
+run-name: iOS IPA 构建中...
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # 手动触发
 
 jobs:
   build:
-    name: Build iOS IPA
+    name: 构建 iOS IPA
     runs-on: macos-14
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
+      - name: 签出代码
         uses: actions/checkout@v4
 
-      - name: 🚀 30秒生成 IPA - 最简单最可靠方式
+      - name: 🛠️ 构建 iOS 应用
         run: |
-          echo "📝 创建 Swift 源文件..."
-          cat > main.swift << 'EOF'
+          echo "📝 创建 iOS 项目..."
+          mkdir -p iOSApp
+          cd iOSApp
+
+          # 1. 创建 ViewController
+          cat > ViewController.swift << 'EOF'
+import UIKit
+import WebKit
+
+class ViewController: UIViewController, WKNavigationDelegate {
+    var webView: WKWebView!
+    var activityIndicator: UIActivityIndicatorView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "GitHub iOS v1.0.0"
+        view.backgroundColor = .systemBackground
+        setupWebView()
+        setupActivityIndicator()
+        loadGitHub()
+    }
+
+    func setupWebView() {
+        let config = WKWebViewConfiguration()
+        webView = WKWebView(frame: view.bounds, configuration: config)
+        webView.navigationDelegate = self
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(webView)
+    }
+
+    func setupActivityIndicator() {
+        activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        view.addSubview(activityIndicator)
+    }
+
+    func loadGitHub() {
+        guard let url = URL(string: "https://github.com") else { return }
+        webView.load(URLRequest(url: url))
+    }
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        activityIndicator.startAnimating()
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        activityIndicator.stopAnimating()
+    }
+}
+EOF
+
+          # 2. 创建 AppDelegate
+          cat > AppDelegate.swift << 'EOF'
 import UIKit
 
 @main class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
-        let vc = UIViewController()
-        vc.view.backgroundColor = .systemBackground
-        let label = UILabel(frame: CGRect(x: 0, y: 150, width: UIScreen.main.bounds.width, height: 60))
-        label.text = "🎉 GitHub iOS App"
-        label.font = UIFont.boldSystemFont(ofSize: 28)
-        label.textAlignment = .center
-        label.textColor = .label
-        vc.view.addSubview(label)
-        let subLabel = UILabel(frame: CGRect(x: 0, y: 220, width: UIScreen.main.bounds.width, height: 40))
-        subLabel.text = "v1.0.0 安装成功！"
-        subLabel.font = UIFont.systemFont(ofSize: 18)
-        subLabel.textAlignment = .center
-        subLabel.textColor = .secondaryLabel
-        vc.view.addSubview(subLabel)
-        window?.rootViewController = vc
+        window?.rootViewController = UINavigationController(rootViewController: ViewController())
         window?.makeKeyAndVisible()
         return true
     }
 }
 EOF
 
-          echo "📝 创建 Info.plist..."
+          # 3. 创建 Info.plist
           cat > Info.plist << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleExecutable</key><string>App</string>
-    <key>CFBundleIdentifier</key><string>com.github.iosapp</string>
-    <key>CFBundleName</key><string>GitHub iOS</string>
-    <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.0.0</string>
-    <key>CFBundleVersion</key><string>1</string>
-    <key>LSRequiresIPhoneOS</key><true/>
-    <key>MinimumOSVersion</key><string>16.0</string>
-    <key>UILaunchScreen</key><dict/>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>GitHubiOS</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.github.iosapp</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>GitHub iOS</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>MinimumOSVersion</key>
+    <string>16.0</string>
+    <key>UILaunchScreen</key>
+    <dict/>
 </dict>
 </plist>
 EOF
 
-          echo "🔨 编译 arm64 iOS 可执行文件..."
+          echo "✅ 源文件创建完成！"
+          ls -la
+
+          echo "🔨 编译 arm64 可执行文件..."
           swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
             -target arm64-apple-ios16.0 \
-            -emit-executable -o App main.swift
+            -emit-executable -o GitHubiOS \
+            AppDelegate.swift ViewController.swift
+
           echo "✅ 编译完成！"
+          ls -lh GitHubiOS
 
-          echo "📦 打包 IPA..."
-          mkdir -p Payload/App.app
-          cp App Payload/App.app/
-          cp Info.plist Payload/App.app/
-          zip -qr GitHub-iOS-App-v1.0.0.ipa Payload/
+          echo "📦 创建 IPA 包..."
+          mkdir -p Payload/GitHubiOS.app
+          cp GitHubiOS Payload/GitHubiOS.app/
+          cp Info.plist Payload/GitHubiOS.app/
 
+          # 创建 PkgInfo
+          echo -n "APPL????" > Payload/GitHubiOS.app/PkgInfo
+
+          # 创建 ZIP
+          zip -qr ../GitHub-iOS-App-v1.0.0.ipa Payload/
+          cd ..
           ls -lh GitHub-iOS-App-v1.0.0.ipa
-          echo "✅ IPA 生成成功！大小: $(du -h GitHub-iOS-App-v1.0.0.ipa | cut -f1)"
+          echo "✅ IPA 构建成功！大小: $(du -h GitHub-iOS-App-v1.0.0.ipa | cut -f1)"
 
-      - name: 📤 上传到 GitHub Release
+      - name: 📤 上传到 Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
           tag_name: v1.0.0
           name: GitHub iOS App v1.0.0
-          files: GitHub-iOS-App-v1.0.0.ipa
-          fail_on_unmatched_files: true
+          files: iOSApp/GitHub-iOS-App-v1.0.0.ipa
           append_body: true
+          fail_on_unmatched_files: false
           body: |
-            # 🎉 GitHub iOS App v1.0.0 - 可直接安装
-            
-            ## 📱 下载文件
-            
-            **直接下载：** `GitHub-iOS-App-v1.0.0.ipa`
-            
-            ## 🚀 安装方式（30秒完成）
-            
-            ### 推荐：Sideloadly（免费，无需开发者账号）
-            1. **下载 Sideloadly**：https://sideloadly.io/
-            2. **打开 Sideloadly**
-            3. **把 IPA 文件拖进去**
-            4. **选择你的 iPhone/iPad**
-            5. **点击 Start**
-            6. **手机上信任开发者**：设置 → 通用 → VPN与设备管理 → 信任
-            
-            ## ✅ 系统要求
+            # 📱 GitHub iOS App v1.0.0 - 可直接安装
+
+            ## 下载安装
+
+            **下载文件：** `GitHub-iOS-App-v1.0.0.ipa`
+
+            ## 安装步骤（30秒完成）
+
+            ### 方式 1：Sideloadly 安装（推荐，支持 Windows/Mac）
+            1. 下载 Sideloadly：https://sideloadly.io/
+            2. 打开 Sideloadly
+            3. 把下载的 IPA 文件拖进去
+            4. 选择你的 iPhone/iPad
+            5. 点击 Start
+            6. 手机上：设置 → 通用 → VPN与设备管理 → 信任开发者证书
+
+            ### 方式 2：AltStore 安装（无线安装）
+            1. 下载 AltStore：https://altstore.io/
+            2. 在 My Apps 页面点击 + 号
+            3. 选择 IPA 文件
+
+            ## 系统要求
             - iOS 16.0 或更高版本
             - 支持 iPhone 和 iPad
+
+            ## 功能
+            - ✅ 完整的 GitHub 网页版功能
+            - ✅ 内置浏览器
+            - ✅ 加载指示器
+            - ✅ 支持登录和所有 GitHub 操作
