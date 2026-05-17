@@ -1,0 +1,43 @@
+name: 📱 Simple IPA Build
+on: push
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🔨 Build IPA
+        run: |
+          cd SimpleGitHubApp
+          swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) -target arm64-apple-ios16.0 -emit-executable -o SimpleGitHubApp main.swift
+          mkdir -p Payload/SimpleGitHubApp.app
+          cp SimpleGitHubApp Payload/SimpleGitHubApp.app/
+          cp Info.plist Payload/SimpleGitHubApp.app/
+          echo -n "APPL????" > Payload/SimpleGitHubApp.app/PkgInfo
+          zip -qr SimpleGitHubApp.ipa Payload/
+          ls -lh SimpleGitHubApp.ipa
+      - name: 📤 Upload to Release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          tag_name: v1.0.0
+          name: GitHub iOS App v1.0.0
+          files: SimpleGitHubApp/SimpleGitHubApp.ipa
+          append_body: true
+          fail_on_unmatched_files: false
+          body: |
+            # 📱 GitHub iOS App v1.0.0 - 可直接安装
+            
+            ## ✅ 下载安装
+            **下载：** `SimpleGitHubApp.ipa`
+            
+            ## 🚀 安装步骤（30秒）
+            1. **下载 Sideloadly**：https://sideloadly.io/
+            2. **打开 Sideloadly**
+            3. **把下载的 IPA 拖进去**
+            4. **选择你的 iPhone**
+            5. **点击 Start**
+            6. **手机上信任证书：设置 → 通用 → VPN与设备管理 → 信任**
+            ## 系统要求
+            - iOS 16.0+
+            - iPhone / iPad
