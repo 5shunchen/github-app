@@ -1,0 +1,131 @@
+# Codemagic 配置文件 - 一键构建 iOS IPA
+# 连接 GitHub 仓库，自动构建！
+# 官网：https://codemagic.io/
+
+workflows:
+  ios-ipa-build:
+    name: 📱 GitHub iOS App IPA Build
+    max_build_duration: 15
+    instance_type: mac_mini_m1
+    environment:
+      xcode: latest
+      vars:
+        BUNDLE_ID: "com.github.iosapp"
+        APP_NAME: "GitHub iOS"
+        VERSION: "1.0.0"
+    scripts:
+      - name: 📝 创建 iOS 项目
+        script: |
+          set -ex
+          echo "🚀 开始构建 IPA..."
+
+          # 创建项目目录
+          mkdir -p build
+          cd build
+
+          # 创建源代码
+          cat > main.swift << 'EOF'
+import UIKit
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    var window: UIWindow?
+    
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        let vc = UIViewController()
+        vc.view.backgroundColor = .systemBackground
+        
+        let label = UILabel(frame: CGRect(x: 0, y: 150, width: UIScreen.main.bounds.width, height: 60))
+        label.text = "🎉 GitHub iOS v1.0.0"
+        label.font = UIFont.boldSystemFont(ofSize: 28)
+        label.textAlignment = .center
+        vc.view.addSubview(label)
+        
+        let subLabel = UILabel(frame: CGRect(x: 0, y: 220, width: UIScreen.main.bounds.width, height: 40))
+        subLabel.text = "Codemagic 云构建成功！"
+        subLabel.font = UIFont.systemFont(ofSize: 18)
+        subLabel.textAlignment = .center
+        subLabel.textColor = .secondaryLabel
+        vc.view.addSubview(subLabel)
+        
+        window?.rootViewController = vc
+        window?.makeKeyAndVisible()
+        return true
+    }
+}
+EOF
+
+          # 创建 Info.plist
+          cat > Info.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>GitHubiOS</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.github.iosapp</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>GitHub iOS</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>MinimumOSVersion</key>
+    <string>16.0</string>
+</dict>
+</plist>
+EOF
+
+          echo "✅ 源代码创建完成！"
+
+      - name: 🔨 编译 iOS 应用
+        script: |
+          set -ex
+          cd build
+          
+          echo "📱 编译 arm64 可执行文件..."
+          swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
+            -target arm64-apple-ios16.0 \
+            -emit-executable -o GitHubiOS main.swift
+
+          echo "✅ 编译完成！"
+          ls -lh GitHubiOS
+          file GitHubiOS
+
+      - name: 📦 打包 IPA
+        script: |
+          set -ex
+          cd build
+          
+          echo "📦 创建 IPA 包..."
+          mkdir -p Payload/GitHubiOS.app
+          cp GitHubiOS Payload/GitHubiOS.app/
+          cp Info.plist Payload/GitHubiOS.app/
+          echo -n "APPL????" > Payload/GitHubiOS.app/PkgInfo
+          zip -qr GitHub-iOS-App-v1.0.0.ipa Payload/
+          
+          echo "✅ IPA 打包成功！"
+          ls -lh GitHub-iOS-App-v1.0.0.ipa
+
+    artifacts:
+      - build/GitHub-iOS-App-v1.0.0.ipa
+
+    publishing:
+      scripts:
+        - name: 🎉 构建完成！
+          script: |
+            echo "===================================="
+            echo "✅ IPA 构建完成！"
+            echo "📱 文件: GitHub-iOS-App-v1.0.0.ipa"
+            echo "🚀 现在可以下载安装到 iPhone 了！"
+            echo "===================================="
