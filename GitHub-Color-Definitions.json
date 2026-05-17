@@ -1,0 +1,177 @@
+{
+  "name": "GitHub iOS Dark Theme Color Definitions",
+  "version": "1.0.0",
+  "updated": "2026-05-17",
+  "colors": {
+    "background": {
+      "canvas": {
+        "hex": "#0D1117",
+        "rgb": [13, 17, 23],
+        "usage": "Main page background"
+      },
+      "default": {
+        "hex": "#161B22",
+        "rgb": [22, 27, 34],
+        "usage": "Cards, sheets, navigation bar"
+      },
+      "subtle": {
+        "hex": "#21262D",
+        "rgb": [33, 38, 45],
+        "usage": "Inputs, buttons, selected rows"
+      },
+      "inset": {
+        "hex": "#010409",
+        "rgb": [1, 4, 9],
+        "usage": "Code blocks, inset areas"
+      },
+      "overlay": {
+        "hex": "#000000",
+        "rgba": [0, 0, 0, 0.8],
+        "usage": "Modal overlay background"
+      }
+    },
+    "text": {
+      "primary": {
+        "hex": "#F0F6FC",
+        "rgb": [240, 246, 252],
+        "usage": "Main text, titles"
+      },
+      "secondary": {
+        "hex": "#8B949E",
+        "rgb": [139, 148, 158],
+        "usage": "Secondary text, descriptions"
+      },
+      "tertiary": {
+        "hex": "#6E7681",
+        "rgb": [110, 118, 129],
+        "usage": "Auxiliary text, placeholders"
+      },
+      "link": {
+        "hex": "#58A6FF",
+        "rgb": [88, 166, 255],
+        "usage": "Links, navigation tint"
+      },
+      "success": {
+        "hex": "#3FB950",
+        "rgb": [63, 185, 80],
+        "usage": "Success messages"
+      },
+      "warning": {
+        "hex": "#E3B341",
+        "rgb": [227, 179, 65],
+        "usage": "Warning messages"
+      },
+      "danger": {
+        "hex": "#F85149",
+        "rgb": [248, 81, 73],
+        "usage": "Error messages, delete actions"
+      },
+      "white": {
+        "hex": "#FFFFFF",
+        "rgb": [255, 255, 255],
+        "usage": "Button text"
+      }
+    },
+    "border": {
+      "default": {
+        "hex": "#30363D",
+        "rgb": [48, 54, 61],
+        "usage": "Main borders, button borders"
+      },
+      "muted": {
+        "hex": "#21262D",
+        "rgb": [33, 38, 45],
+        "usage": "Secondary borders, dividers"
+      },
+      "focus": {
+        "hex": "#1F6FEB",
+        "rgb": [31, 111, 235],
+        "usage": "Focus state border"
+      },
+      "success": {
+        "hex": "#238636",
+        "rgb": [35, 134, 54],
+        "usage": "Success state border"
+      },
+      "danger": {
+        "hex": "#DA3633",
+        "rgb": [218, 54, 51],
+        "usage": "Error state border"
+      }
+    },
+    "accent": {
+      "green": {
+        "hex": "#238636",
+        "rgb": [35, 134, 54],
+        "usage": "Primary button, success state"
+      },
+      "greenHover": {
+        "hex": "#2EA043",
+        "rgb": [46, 160, 67],
+        "usage": "Button highlight"
+      },
+      "blue": {
+        "hex": "#58A6FF",
+        "rgb": [88, 166, 255],
+        "usage": "Links, info state"
+      },
+      "purple": {
+        "hex": "#A371F7",
+        "rgb": [163, 113, 247],
+        "usage": "Emphasis, merged PR"
+      },
+      "red": {
+        "hex": "#F85149",
+        "rgb": [248, 81, 73],
+        "usage": "Errors, notifications"
+      },
+      "yellow": {
+        "hex": "#E3B341",
+        "rgb": [227, 179, 65],
+        "usage": "Warnings, pending state"
+      },
+      "orange": {
+        "hex": "#DB6D28",
+        "rgb": [219, 109, 40],
+        "usage": "Build status"
+      }
+    },
+    "languageColors": {
+      "Swift": "#F05138",
+      "Python": "#3572A5",
+      "JavaScript": "#F1E05A",
+      "TypeScript": "#2B7489",
+      "Objective-C": "#438EFF",
+      "Java": "#B07219",
+      "Kotlin": "#A97BFF",
+      "Go": "#00ADD8",
+      "Rust": "#DEA584",
+      "C++": "#F34B7D",
+      "C": "#555555",
+      "Ruby": "#701516",
+      "PHP": "#4F5D95",
+      "Shell": "#89E051",
+      "Dart": "#00B4AB",
+      "HTML": "#E34C26",
+      "CSS": "#563D7C",
+      "Markdown": "#083FA1"
+    }
+  },
+  "spacing": {
+    "spacing1": 4,
+    "spacing2": 8,
+    "spacing3": 12,
+    "spacing4": 16,
+    "spacing5": 20,
+    "spacing6": 24,
+    "spacing8": 32,
+    "spacing10": 40
+  },
+  "radius": {
+    "radius1": 4,
+    "radius2": 6,
+    "radius3": 8,
+    "radius4": 12,
+    "radiusFull": 9999
+  }
+}
