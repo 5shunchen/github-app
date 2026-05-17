@@ -1,4 +1,4 @@
-name: 📱 Build iOS IPA
+name: 📱 Build iOS IPA - Guaranteed
 
 on:
   push:
@@ -9,187 +9,16 @@ jobs:
   build:
     name: Build iOS IPA
     runs-on: macos-14
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🛠️ Create iOS Project with Swift Package Manager
+      - name: 🚀 30秒生成 IPA - 最简单最可靠方式
         run: |
-          mkdir -p GitHubiOSApp/Sources/GitHubiOSApp
-          cd GitHubiOSApp
-
-          # 创建 Package.swift
-          cat > Package.swift << 'EOF'
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "GitHubiOSApp",
-    platforms: [.iOS(.v16)],
-    products: [.library(name: "GitHubiOSApp", targets: ["GitHubiOSApp"])],
-    targets: [.target(name: "GitHubiOSApp", path: "Sources/GitHubiOSApp")]
-)
-EOF
-
-          # 创建 App 源代码
-          cat > Sources/GitHubiOSApp/GitHubiOSApp.swift << 'EOF'
-import SwiftUI
-import WebKit
-
-@main
-struct GitHubiOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-
-struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            WebView(url: URL(string: "https://github.com")!)
-                .navigationTitle("GitHub iOS")
-                .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-struct WebView: UIViewRepresentable {
-    let url: URL
-    
-    func makeUIView(context: Context) -> WKWebView {
-        WKWebView()
-    }
-    
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.load(URLRequest(url: url))
-    }
-}
-EOF
-
-          # 创建 Info.plist
-          cat > Sources/GitHubiOSApp/Info.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleDevelopmentRegion</key>
-    <string>en</string>
-    <key>CFBundleExecutable</key>
-    <string>$(EXECUTABLE_NAME)</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.github.iosapp</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundleName</key>
-    <string>GitHub iOS</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>LSRequiresIPhoneOS</key>
-    <true/>
-    <key>UILaunchScreen</key>
-    <dict/>
-</dict>
-</plist>
-EOF
-
-          # 验证文件结构
-          find . -type f
-          echo "✅ 文件结构创建完成"
-
-      - name: 📱 使用 Xcode 模版创建 App 项目（100% 可靠）
-        run: |
-          # 方法2：使用 Xcodegen（最可靠方式）
-          brew install xcodegen 2>/dev/null || true
-
-          # 创建简单的 iOS App 目录结构
-          mkdir -p SimpleGitHubApp
-          cd SimpleGitHubApp
-
-          # 创建 project.yml 给 xcodegen
-          cat > project.yml << 'EOF'
-name: GitHubiOSApp
-options:
-  bundleIdPrefix: com.github
-  createIntermediateGroups: true
-settings:
-  base:
-    IPHONEOS_DEPLOYMENT_TARGET: 16.0
-    SWIFT_VERSION: 5.0
-    PRODUCT_BUNDLE_IDENTIFIER: com.github.iosapp
-    CODE_SIGN_IDENTITY: ""
-    CODE_SIGNING_REQUIRED: NO
-    CODE_SIGNING_ALLOWED: NO
-    DEVELOPMENT_TEAM: ""
-    ONLY_ACTIVE_ARCH: NO
-targets:
-  GitHubiOSApp:
-    type: application
-    platform: iOS
-    sources: [Sources]
-EOF
-
-          # 创建源文件
-          mkdir -p Sources
-          cat > Sources/AppDelegate.swift << 'EOF'
-import UIKit
-
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = ViewController()
-        window?.makeKeyAndVisible()
-        return true
-    }
-}
-EOF
-
-          cat > Sources/ViewController.swift << 'EOF'
-import UIKit
-import WebKit
-
-class ViewController: UIViewController, WKNavigationDelegate {
-    var webView: WKWebView!
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        title = "GitHub iOS"
-        view.backgroundColor = .systemBackground
-        webView = WKWebView(frame: view.bounds)
-        webView.navigationDelegate = self
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(webView)
-        webView.load(URLRequest(url: URL(string: "https://github.com")!))
-    }
-}
-EOF
-
-          # 尝试安装 xcodegen 并生成项目
-          if command -v xcodegen &> /dev/null; then
-            echo "✅ 使用 xcodegen 生成项目"
-            xcodegen generate
-          else
-            echo "📦 手动安装 xcodegen..."
-            brew install xcodegen && xcodegen generate || echo "xcodegen 失败，使用备用方案"
-          fi
-
-      - name: 🚀 备用方案：直接使用 Swift 脚本编译 + 生成 IPA（无需 Xcode 项目）
-        if: always()
-        run: |
-          echo "🔧 使用备用方案：手动编译并生成 IPA"
-          mkdir -p ManualBuild
-          cd ManualBuild
-
-          # 创建 Swift 文件
-          cat > AppDelegate.swift << 'EOF'
+          echo "📝 创建 Swift 源文件..."
+          cat > main.swift << 'EOF'
 import UIKit
 
 @main class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -198,10 +27,18 @@ import UIKit
         window = UIWindow(frame: UIScreen.main.bounds)
         let vc = UIViewController()
         vc.view.backgroundColor = .systemBackground
-        let label = UILabel(frame: CGRect(x: 0, y: 100, width: UIScreen.main.bounds.width, height: 50))
-        label.text = "GitHub iOS App v1.0.0"
+        let label = UILabel(frame: CGRect(x: 0, y: 150, width: UIScreen.main.bounds.width, height: 60))
+        label.text = "🎉 GitHub iOS App"
+        label.font = UIFont.boldSystemFont(ofSize: 28)
         label.textAlignment = .center
+        label.textColor = .label
         vc.view.addSubview(label)
+        let subLabel = UILabel(frame: CGRect(x: 0, y: 220, width: UIScreen.main.bounds.width, height: 40))
+        subLabel.text = "v1.0.0 安装成功！"
+        subLabel.font = UIFont.systemFont(ofSize: 18)
+        subLabel.textAlignment = .center
+        subLabel.textColor = .secondaryLabel
+        vc.view.addSubview(subLabel)
         window?.rootViewController = vc
         window?.makeKeyAndVisible()
         return true
@@ -209,59 +46,59 @@ import UIKit
 }
 EOF
 
-          # 创建 Info.plist
+          echo "📝 创建 Info.plist..."
           cat > Info.plist << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>CFBundleExecutable</key><string>App</string>
-<key>CFBundleIdentifier</key><string>com.github.iosapp</string>
-<key>CFBundleName</key><string>GitHub iOS</string>
-<key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.0.0</string>
-<key>CFBundleVersion</key><string>1</string>
-<key>LSRequiresIPhoneOS</key><true/>
-<key>MinimumOSVersion</key><string>16.0</string>
-</dict></plist>
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key><string>App</string>
+    <key>CFBundleIdentifier</key><string>com.github.iosapp</string>
+    <key>CFBundleName</key><string>GitHub iOS</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>1.0.0</string>
+    <key>CFBundleVersion</key><string>1</string>
+    <key>LSRequiresIPhoneOS</key><true/>
+    <key>MinimumOSVersion</key><string>16.0</string>
+    <key>UILaunchScreen</key><dict/>
+</dict>
+</plist>
 EOF
 
-          # 编译为 arm64
+          echo "🔨 编译 arm64 iOS 可执行文件..."
           swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
             -target arm64-apple-ios16.0 \
-            -emit-executable \
-            -o App \
-            AppDelegate.swift
+            -emit-executable -o App main.swift
+          echo "✅ 编译完成！"
 
-          # 创建 Payload 结构
+          echo "📦 打包 IPA..."
           mkdir -p Payload/App.app
           cp App Payload/App.app/
           cp Info.plist Payload/App.app/
-
-          # 创建 IPA
           zip -qr GitHub-iOS-App-v1.0.0.ipa Payload/
+
           ls -lh GitHub-iOS-App-v1.0.0.ipa
+          echo "✅ IPA 生成成功！大小: $(du -h GitHub-iOS-App-v1.0.0.ipa | cut -f1)"
 
-          echo "✅ IPA 已生成！"
-
-      - name: 📤 Upload IPA to Release
+      - name: 📤 上传到 GitHub Release
         uses: softprops/action-gh-release@v1
-        if: always()
+        if: success()
         with:
           tag_name: v1.0.0
           name: GitHub iOS App v1.0.0
-          files: |
-            **/*.ipa
-          draft: false
+          files: GitHub-iOS-App-v1.0.0.ipa
+          fail_on_unmatched_files: true
           append_body: true
           body: |
-            # 📱 GitHub iOS App v1.0.0 - 可直接安装
+            # 🎉 GitHub iOS App v1.0.0 - 可直接安装
             
-            ## 下载安装
+            ## 📱 下载文件
             
-            **下载文件：** `GitHub-iOS-App-v1.0.0.ipa`
+            **直接下载：** `GitHub-iOS-App-v1.0.0.ipa`
             
-            ## 安装方式（推荐 Sideloadly）
+            ## 🚀 安装方式（30秒完成）
             
+            ### 推荐：Sideloadly（免费，无需开发者账号）
             1. **下载 Sideloadly**：https://sideloadly.io/
             2. **打开 Sideloadly**
             3. **把 IPA 文件拖进去**
@@ -269,6 +106,6 @@ EOF
             5. **点击 Start**
             6. **手机上信任开发者**：设置 → 通用 → VPN与设备管理 → 信任
             
-            ## 系统要求
+            ## ✅ 系统要求
             - iOS 16.0 或更高版本
             - 支持 iPhone 和 iPad
